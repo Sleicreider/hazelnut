@@ -2,34 +2,22 @@ define(['pixi'], function (PIXI) {
 
 	var startGame = function(){
 	
-		// test change
+		var basket, landscape, squirrel;
+	
 		// create an new instance of a pixi stage
-		var stage = new PIXI.Stage(0x66FF99);
+		var stage = new PIXI.Stage(0x000000);
 
 		// create a renderer instance
-		var renderer = new PIXI.WebGLRenderer(400, 300);//autoDetectRenderer(400, 300);
+		var renderer = new PIXI.WebGLRenderer(512, 512);//autoDetectRenderer(400, 300);
+		
+		createAndAddSprites();
+		
+		window.onkeydown = keyDEvent;
 
 		// add the renderer view element to the DOM
 		document.body.appendChild(renderer.view);
 
 		requestAnimFrame( animate );
-
-		// create a texture from an image path
-		var texture = PIXI.Texture.fromImage("img/bunny.png");
-		// create a new Sprite using the texture
-		var bunny = new PIXI.Sprite(texture);
-
-		// center the sprites anchor point
-		bunny.anchor.x = 0.5;
-		bunny.anchor.y = 0.5;
-
-		// move the sprite t the center of the screen
-		bunny.position.x = 200;
-		bunny.position.y = 150;
-		
-		window.onkeydown = keyDEvent;
-
-		stage.addChild(bunny);
 
 		function animate() {
 
@@ -43,22 +31,41 @@ define(['pixi'], function (PIXI) {
 		}
 		
 		function keyDEvent(e) {
-			// up arrow => 38
-			if(e.keyCode === 38){
-				bunny.position.y = bunny.position.y - 2;
-			}
-			// down arrow => 40
-			if(e.keyCode === 40){
-				bunny.position.y = bunny.position.y + 2;
-			}
 			// left arrow => 37
 			if(e.keyCode === 37){
-				bunny.position.x = bunny.position.x - 2;
+				basket.position.x = basket.position.x - 4;
 			}
 			// right arrow => 39
 			if(e.keyCode === 39){
-				bunny.position.x = bunny.position.x + 2;
+				basket.position.x = basket.position.x + 4;
 			}
+		}
+		
+		function createAndAddSprites() {
+			var basketTexture = PIXI.Texture.fromImage("img/basket.png");
+			basket = new PIXI.Sprite(basketTexture);
+			basket.anchor.x = 0.5;
+			basket.anchor.y = 0.5;
+			basket.position.x = 100;
+			basket.position.y = 496;
+			
+			var landscapeTexture = PIXI.Texture.fromImage("img/landscape.png");
+			landscape = new PIXI.Sprite(landscapeTexture);
+			landscape.anchor.x = 0;
+			landscape.anchor.y = 0;
+			landscape.position.x = 0;
+			landscape.position.y = 0;
+			
+			var squirrelTexture = PIXI.Texture.fromImage("img/squirrel.png");
+			squirrel = new PIXI.Sprite(squirrelTexture);
+			squirrel.anchor.x = 0.5;
+			squirrel.anchor.y = 0.5;
+			squirrel.position.x = 200;
+			squirrel.position.y = 40;
+			
+			stage.addChild(landscape);
+			stage.addChild(basket);
+			stage.addChild(squirrel);
 		}
 	};
 		
