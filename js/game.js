@@ -8,6 +8,15 @@ define(['pixi'], function (PIXI) {
 		var rendererWidth = 512;
 	
 		var basket, landscape, squirrel, fallingItem;
+        
+        //Random value for squirrel
+        var dstPositonX = Math.floor(Math.random() *(512 - 0 + 1)) + 0;; /**< 0 - 512 x coords */
+        var enemyPreviousPositionX = 0;
+        
+        //Random value for squirrel to drop a object
+        var randDropWaitValue = Math.floor(Math.random() *(5 - 1 + 1)) + 1; /**< 5 - 1 seconds */
+        var previousDropTime = (new Date().getSeconds());
+
 	
 		// create an new instance of a pixi stage
 		var stage = new PIXI.Stage(0x000000);
@@ -77,8 +86,9 @@ define(['pixi'], function (PIXI) {
 			fallingItem = new PIXI.Sprite(itemTexture);
 			fallingItem.anchor.x = 0.5;
 			fallingItem.anchor.y = 0.5;
-			fallingItem.position.x = getRandomStartingPoint();
-			fallingItem.position.y = 50;
+			//fallingItem.position.x = getRandomStartingPoint();
+			fallingItem.position.x = squirrel.position.x;
+            fallingItem.position.y = 50;
 			
 			stage.addChild(fallingItem);
 		}
@@ -88,12 +98,15 @@ define(['pixi'], function (PIXI) {
 		}
 		
 		function updateItem() {
-			fallingItem.position.y += 2;
+			//fallingItem.position.y += 2;
 			
 			if( collision(fallingItem, basket, 10, 10) ){
 				stage.removeChild(fallingItem);
 				createAndAddItem();
 			}
+            
+            AIMovement();
+            AIDropObject();
 		}
 		
 		function collision(object1, object2, catchOffsetTop, catchOffsetSide) {
@@ -106,6 +119,43 @@ define(['pixi'], function (PIXI) {
 			}
 			return false;
 		}
+        
+        function AIMovement()
+        {        
+            var enemyPositionX = squirrel.position.x;
+            
+            
+            //Get New Destination
+            if(enemyPositionX >= dstPositonX && enemyPreviousPositionX <= dstPositonX || enemyPositionX <= dstPositonX && enemyPreviousPositionX >= dstPositonX)
+            {
+                dstPositonX = Math.floor(Math.random() *(512 - 0 + 1)) + 0;
+            }
+                  
+            //Move to destination
+            if(dstPositonX > enemyPositionX)
+            {
+                enemyPreviousPositionX = enemyPositionX;
+                enemyPositionX +=5;
+            }
+            else
+            {
+                enemyPreviousPositionX = enemyPositionX;
+                enemyPositionX -=5;
+            }
+            
+            squirrel.position.x = enemyPositionX;
+            
+        }
+        
+        function AIDropObject()
+        {
+            if((previousDropTime + randDropWaitValue) < (new Date().getSeconds()))
+            {
+                createAndAddItem();
+                randDropWaitValue = Math.floor(Math.random() *(5 - 1 + 1)) + 1;
+                previousDropTime = (new Date().getSeconds());
+            }
+        }
 	};
 		
 	return {startGame:startGame};
