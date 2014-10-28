@@ -8,7 +8,7 @@ define(['pixi'], function (PIXI) {
 		var stage = new PIXI.Stage(0x000000);
 
 		// create a renderer instance
-		var renderer = new PIXI.WebGLRenderer(512, 512);//autoDetectRenderer(400, 300);
+		var renderer = new PIXI.autoDetectRenderer(512, 512); //WebGLRenderer(512, 512);
 		
 		createAndAddSprites();
 		
