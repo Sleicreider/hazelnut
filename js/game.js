@@ -2,15 +2,21 @@ define(['pixi'], function (PIXI) {
 
 	var startGame = function(){
 	
-		var basket, landscape, squirrel;
+		var itemTexture = PIXI.Texture.fromImage("img/hazelnut.png");
+	
+		var rendererHeight = 512;
+		var rendererWidth = 512;
+	
+		var basket, landscape, squirrel, fallingItem;
 	
 		// create an new instance of a pixi stage
 		var stage = new PIXI.Stage(0x000000);
 
 		// create a renderer instance
-		var renderer = new PIXI.autoDetectRenderer(512, 512); //WebGLRenderer(512, 512);
+		var renderer = new PIXI.autoDetectRenderer(rendererWidth, rendererHeight); //WebGLRenderer(512, 512)
 		
 		createAndAddSprites();
+		createAndAddItem();
 		
 		window.onkeydown = keyDEvent;
 
@@ -23,8 +29,7 @@ define(['pixi'], function (PIXI) {
 
 			requestAnimFrame( animate );
 
-			// just for fun, lets rotate mr rabbit a little
-			//bunny.rotation += 0.1;
+			updateItem();
 
 			// render the stage
 			renderer.render(stage);
@@ -66,6 +71,40 @@ define(['pixi'], function (PIXI) {
 			stage.addChild(landscape);
 			stage.addChild(basket);
 			stage.addChild(squirrel);
+		}
+		
+		function createAndAddItem() {
+			fallingItem = new PIXI.Sprite(itemTexture);
+			fallingItem.anchor.x = 0.5;
+			fallingItem.anchor.y = 0.5;
+			fallingItem.position.x = getRandomStartingPoint();
+			fallingItem.position.y = 50;
+			
+			stage.addChild(fallingItem);
+		}
+	
+		function getRandomStartingPoint() {
+			return Math.floor((Math.random() * rendererWidth) + 0); 
+		}
+		
+		function updateItem() {
+			fallingItem.position.y += 2;
+			
+			if( collision(fallingItem, basket, 10, 10) ){
+				stage.removeChild(fallingItem);
+				createAndAddItem();
+			}
+		}
+		
+		function collision(object1, object2, catchOffsetTop, catchOffsetSide) {
+			if(object1.position.y > object2.position.y - catchOffsetTop &&
+				object1.position.y + object1.height < object2.position.y + object2.height) {
+				if (object1.position.x > object2.position.x - catchOffsetSide &&
+					object1.position.x + object1.width < object2.position.x + object2.width + catchOffsetSide) {
+					return true;
+				}
+			}
+			return false;
 		}
 	};
 		
