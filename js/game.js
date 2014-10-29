@@ -22,6 +22,10 @@ define(['pixi'], function (PIXI) {
         var vec = new Array();
         
         var dropObjectSpeed = 2;
+        var scoreCounter = 0;
+        var previousScoreCounter = -1;
+        var scoretext = new PIXI.Text(scoreCounter);
+        var previousScoreText = 0;
 		/**************************************************/
 	
 		// create an new instance of a pixi stage
@@ -106,11 +110,22 @@ define(['pixi'], function (PIXI) {
 		function updateItem() {
 
 			//fallingItem.position.y += 2;
-			
+                 
+            if(previousScoreCounter != scoreCounter)
+            {
+                if(previousScoreText != 0)
+                {
+                    stage.removeChild(previousScoreText);
+                }
+                scoretext = new PIXI.Text(scoreCounter);
+                stage.addChild(scoretext);
+                previousScoreText = scoretext;
+            }
+
+            previousScoreCounter = scoreCounter;
 
             CheckColliosion();
             AIMovement();
-            
 		}
         
         function CheckColliosion()
@@ -119,6 +134,7 @@ define(['pixi'], function (PIXI) {
             {
                 if( collision(vec[i], basket, 10, 10) )
                 { 
+                    scoreCounter++;
                     stage.removeChild(vec[i]);
                     vec.splice(i,1);
                 }
