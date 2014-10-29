@@ -57,11 +57,11 @@ define(['pixi'], function (PIXI) {
 		function keyDEvent(e) {
 			// left arrow => 37
 			if(e.keyCode === 37){
-				basket.position.x = basket.position.x - 4;
+				basket.position.x = basket.position.x - 15;
 			}
 			// right arrow => 39
 			if(e.keyCode === 39){
-				basket.position.x = basket.position.x + 4;
+				basket.position.x = basket.position.x + 15;
 			}
 		}
 		
