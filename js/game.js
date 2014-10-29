@@ -11,6 +11,17 @@ define(['pixi'], function (PIXI) {
         
         
         /********** VARIABLE DECLARATION SECTION **********/
+        var EState = {
+            RUNNING:    1,
+            PAUSED:     2,
+            MENU:       3,
+            INTRO:      4,
+            EXIT:       5,
+            OFF:        6
+        };
+        
+        var currentState = EState.OFF;
+        
         //Random value for squirrel
         var dstPositonX = Math.floor(Math.random() *(512 - 0 + 1)) + 0;; /**< 0 - 512 x coords */
         var enemyPreviousPositionX = 0;
@@ -52,6 +63,7 @@ define(['pixi'], function (PIXI) {
 
 			// render the stage
 			renderer.render(stage);
+            
 		}
 		
 		function keyDEvent(e) {
@@ -111,22 +123,30 @@ define(['pixi'], function (PIXI) {
 
 			//fallingItem.position.y += 2;
             
-            //Only Add Child when score has changed     
-            if(previousScoreCounter != scoreCounter)
+               
+            SetGameState(EState.RUNNING);
+        
+            if(IsGameState(EState.RUNNING))
             {
-                if(previousScoreText != 0)
+                //Only Add Child when score has changed 
+                if(previousScoreCounter != scoreCounter)
                 {
-                    stage.removeChild(previousScoreText);
+                    if(previousScoreText != 0)
+                    {
+                        stage.removeChild(previousScoreText);
+                    }
+                    scoretext = new PIXI.Text(scoreCounter);
+                    stage.addChild(scoretext);
+                    previousScoreText = scoretext;
                 }
-                scoretext = new PIXI.Text(scoreCounter);
-                stage.addChild(scoretext);
-                previousScoreText = scoretext;
+
+                previousScoreCounter = scoreCounter;
+
+                CheckColliosion();
+                AIMovement();
             }
-
-            previousScoreCounter = scoreCounter;
-
-            CheckColliosion();
-            AIMovement();
+            
+            
 		}
         
         function CheckColliosion()
@@ -182,6 +202,23 @@ define(['pixi'], function (PIXI) {
             AIDropObject();
         }
         
+        function SetGameState(state)
+        {
+            currentState = state;
+        }
+        
+        
+        function IsGameState(state)
+        {
+            if(currentState == state)
+            {
+                return true;
+            }
+            else 
+            {
+                return false;
+            }
+        }
         
         
         function AIDropObject()
