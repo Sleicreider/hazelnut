@@ -16,6 +16,8 @@ define(['pixi'], function (PIXI) {
         //Random value for squirrel to drop a object
         var randDropWaitValue = Math.floor(Math.random() *(5 - 1 + 1)) + 1; /**< 5 - 1 seconds */
         var previousDropTime = (new Date().getSeconds());
+        
+        var vec = new Array();
 
 	
 		// create an new instance of a pixi stage
@@ -89,7 +91,7 @@ define(['pixi'], function (PIXI) {
 			//fallingItem.position.x = getRandomStartingPoint();
 			fallingItem.position.x = squirrel.position.x;
             fallingItem.position.y = 50;
-			
+			vec.push(fallingItem);
 			stage.addChild(fallingItem);
 		}
 	
@@ -98,6 +100,10 @@ define(['pixi'], function (PIXI) {
 		}
 		
 		function updateItem() {
+		for(var i = 0; i < vec.length;i++)
+		{
+			vec[i].position.y += 2;
+		}
 			//fallingItem.position.y += 2;
 			
 			if( collision(fallingItem, basket, 10, 10) ){
@@ -143,8 +149,7 @@ define(['pixi'], function (PIXI) {
                 enemyPositionX -=5;
             }
             
-            squirrel.position.x = enemyPositionX;
-            
+            squirrel.position.x = enemyPositionX; 
         }
         
         function AIDropObject()
@@ -154,6 +159,10 @@ define(['pixi'], function (PIXI) {
                 createAndAddItem();
                 randDropWaitValue = Math.floor(Math.random() *(5 - 1 + 1)) + 1;
                 previousDropTime = (new Date().getSeconds());
+            }
+            if((previousDropTime + randDropWaitValue) > 15 && (new Date().getSeconds()) < 7)
+            {
+            	previousDropTime = 0;
             }
         }
 	};
