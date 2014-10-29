@@ -14,13 +14,14 @@ define(['pixi'], function (PIXI) {
         var EState = {
             RUNNING:    1,
             PAUSED:     2,
-            MENU:       3,
-            INTRO:      4,
-            EXIT:       5,
-            OFF:        6
+            GAMEOVER:   3,
+            MENU:       4,
+            INTRO:      5,
+            EXIT:       6,
+            OFF:        7,
         };
         
-        var currentState = EState.OFF;
+        var currentState = EState.RUNNING;
         
         //Random value for squirrel
         var dstPositonX = Math.floor(Math.random() *(512 - 0 + 1)) + 0;; /**< 0 - 512 x coords */
@@ -34,9 +35,12 @@ define(['pixi'], function (PIXI) {
         
         var dropObjectSpeed = 2;
         var scoreCounter = 0;
+        var missCounter = 0;
         var previousScoreCounter = -1;
         var scoretext = new PIXI.Text(scoreCounter);
         var previousScoreText = 0;
+        
+        var textGameOver = "GAME OVER";
 		/**************************************************/
 	
 		// create an new instance of a pixi stage
@@ -124,7 +128,7 @@ define(['pixi'], function (PIXI) {
 			//fallingItem.position.y += 2;
             
                
-            SetGameState(EState.RUNNING);
+            //SetGameState(EState.RUNNING);
         
             if(IsGameState(EState.RUNNING))
             {
@@ -139,6 +143,11 @@ define(['pixi'], function (PIXI) {
                     stage.addChild(scoretext);
                     previousScoreText = scoretext;
                 }
+                
+                if(missCounter >= 5)
+                {
+                    SetGameState(EState.GAMEOVER);
+                }
 
                 previousScoreCounter = scoreCounter;
 
@@ -146,6 +155,16 @@ define(['pixi'], function (PIXI) {
                 AIMovement();
             }
             
+            if(IsGameState(EState.GAMEOVER))
+            {
+                var gameOverText = new PIXI.Text("GAME OVER");
+                gameOverText.position.x = 512 / 2;
+                gameOverText.position.y = 512 / 2;
+                gameOverText.anchor.x = 0.5;
+                gameOverText.anchor.y = 0.5;
+                stage.addChild(gameOverText);
+            }
+
             
 		}
         
@@ -232,6 +251,7 @@ define(['pixi'], function (PIXI) {
 				{	
                     stage.removeChild(vec[i]);
                     vec.splice(i,1);
+                    missCounter++;
 				}
 			}
 					
