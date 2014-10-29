@@ -110,7 +110,8 @@ define(['pixi'], function (PIXI) {
 		function updateItem() {
 
 			//fallingItem.position.y += 2;
-                 
+            
+            //Only Add Child when score has changed     
             if(previousScoreCounter != scoreCounter)
             {
                 if(previousScoreText != 0)
