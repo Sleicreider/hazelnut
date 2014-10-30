@@ -11,7 +11,7 @@ define(['pixi'], function (PIXI) {
         
         
         /********** VARIABLE DECLARATION SECTION **********/
-        var EState = {
+        var EGameState = {
             RUNNING:    1,
             PAUSED:     2,
             GAMEOVER:   3,
@@ -21,7 +21,7 @@ define(['pixi'], function (PIXI) {
             OFF:        7,
         };
         
-        var currentState = EState.RUNNING;
+        var currentState = EGameState.RUNNING;
         
         //Random value for squirrel
         var dstPositonX = Math.floor(Math.random() *(512 - 0 + 1)) + 0;; /**< 0 - 512 x coords */
@@ -42,6 +42,13 @@ define(['pixi'], function (PIXI) {
         
         var textGameOver = "GAME OVER";
 		/**************************************************/
+        
+        /**************** FRAMEWORK DECLARATION SECTION ******************/
+        
+        var frameworkText;
+        var frameworkTextArray = new Object();
+        var frameworkTextArrayContent = new Array();
+        /*****************************************************************/
 	
 		// create an new instance of a pixi stage
 		var stage = new PIXI.Stage(0x000000);
@@ -127,26 +134,15 @@ define(['pixi'], function (PIXI) {
 
 			//fallingItem.position.y += 2;
             
-               
-            //SetGameState(EState.RUNNING);
+            //SetGameState(EGameState.RUNNING);
         
-            if(IsGameState(EState.RUNNING))
-            {
-                //Only Add Child when score has changed 
-                if(previousScoreCounter != scoreCounter)
-                {
-                    if(previousScoreText != 0)
-                    {
-                        stage.removeChild(previousScoreText);
-                    }
-                    scoretext = new PIXI.Text(scoreCounter);
-                    stage.addChild(scoretext);
-                    previousScoreText = scoretext;
-                }
+            if(IsGameState(EGameState.RUNNING))
+            {   
+                PrintText("score",scoreCounter,500,10,0.5,0.5,true);
                 
                 if(missCounter >= 5)
                 {
-                    SetGameState(EState.GAMEOVER);
+                    SetGameState(EGameState.GAMEOVER);
                 }
 
                 previousScoreCounter = scoreCounter;
@@ -155,17 +151,10 @@ define(['pixi'], function (PIXI) {
                 AIMovement();
             }
             
-            if(IsGameState(EState.GAMEOVER))
-            {
-                var gameOverText = new PIXI.Text("GAME OVER");
-                gameOverText.position.x = 512 / 2;
-                gameOverText.position.y = 512 / 2;
-                gameOverText.anchor.x = 0.5;
-                gameOverText.anchor.y = 0.5;
-                stage.addChild(gameOverText);
-            }
-
-            
+            if(IsGameState(EGameState.GAMEOVER))
+            {   
+                PrintText("gameover","GAME OVER",(512/2),(512/2),0.5,0.5,false);
+            }    
 		}
         
         function CheckColliosion()
@@ -179,7 +168,6 @@ define(['pixi'], function (PIXI) {
                     vec.splice(i,1);
                 }
             }
-
         }
 		
 		function collision(object1, object2, catchOffsetTop, catchOffsetSide) {
@@ -193,6 +181,7 @@ define(['pixi'], function (PIXI) {
 			return false;
 		}
         
+        /***************** BEGIN AI SECTION *****************/
         function AIMovement()
         {                   
             var enemyPositionX = squirrel.position.x;
@@ -219,24 +208,6 @@ define(['pixi'], function (PIXI) {
             squirrel.position.x = enemyPositionX; 
             
             AIDropObject();
-        }
-        
-        function SetGameState(state)
-        {
-            currentState = state;
-        }
-        
-        
-        function IsGameState(state)
-        {
-            if(currentState == state)
-            {
-                return true;
-            }
-            else 
-            {
-                return false;
-            }
         }
         
         
@@ -266,6 +237,95 @@ define(['pixi'], function (PIXI) {
             	previousDropTime = 0;
             }
         }
+        /***************** END AI SECTION *****************/
+        
+        /***************** BEGIN GAMESTATE SECTION *****************/
+        function SetGameState(state)
+        {
+            currentState = state;
+        }
+          
+        function IsGameState(state)
+        {
+            if(currentState == state)
+            {
+                return true;
+            }
+            else 
+            {
+                return false;
+            }
+        } 
+        /***************** END GAMESTATE SECTION *****************/
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        /**************** BEGIN FRAMEWORK ****************/
+        
+        /**
+        *   Print a text to the screen by id (use it like a string "<id name>")
+        */
+        function PrintText(id,text,posX,posY,anchorX,anchorY,updateAble)
+        {
+            //if id is not available
+            if(!(id in frameworkTextArray))
+            {
+                frameworkText = new PIXI.Text(text);
+                frameworkText.position.x = posX;
+                frameworkText.position.y = posY;
+                frameworkText.anchor.x = anchorX;
+                frameworkText.anchor.y = anchorY;
+                
+                stage.addChild(frameworkText);
+                
+                frameworkTextArray[id] = frameworkText;
+            }
+            
+            //If id is available check if it is null, if so then print
+            if(id in frameworkTextArray)
+            {
+                if(frameworkTextArray[id] == null || updateAble == true)
+                {
+                    if(updateAble)
+                    {
+                        stage.removeChild(frameworkTextArray[id])
+                    }
+                    
+                    frameworkText = new PIXI.Text(text);
+                    frameworkText.position.x = posX;
+                    frameworkText.position.y = posY;
+                    frameworkText.anchor.x = anchorX;
+                    frameworkText.anchor.y = anchorY;
+                
+                    stage.addChild(frameworkText);
+                
+                    frameworkTextArray[id] = frameworkText;
+                }
+            }
+        }
+        
+        /**
+        * Remove a text by id
+        */
+        function ClearText(id)
+        {
+            if(id in frameworkTextArray)
+            {
+                stage.removeChild(frameworkTextArray[id]);
+                frameworkTextArray[id] = null;
+            }
+        }
+        
+        /**************** BEGIN FRAMEWORK ****************/
+        
 	};
 		
 	return {startGame:startGame};
