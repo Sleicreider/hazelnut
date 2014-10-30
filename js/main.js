@@ -1,6 +1,7 @@
 require.config({
 	paths: {
 		'game': 'game',
+        'fpsmeter': 'fpsmeter',
 		'pixi': 'libs/pixi'
 	},
 	shim: {
@@ -10,7 +11,7 @@ require.config({
 	}
 });
 
-require(['pixi','game'], function(pixi, game){ 
+require(['pixi','game','fpsmeter'], function(pixi, game, fpsmeter){ 
 	console.log('ready?', game);
 	game.startGame();
 });

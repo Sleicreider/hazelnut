@@ -1,4 +1,4 @@
-define(['pixi'], function (PIXI) {
+define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 
 	var startGame = function(){
 	
@@ -42,6 +42,12 @@ define(['pixi'], function (PIXI) {
         
         var textGameOver = "GAME OVER";
 		/**************************************************/
+        
+        /**************** DEBUG DECLARATION SECTION **********************/
+        var debug_mode = true;
+        
+        var fps_stat = new FPSMeter();
+        /*****************************************************************/
         
         /**************** FRAMEWORK DECLARATION SECTION ******************/
         
@@ -135,7 +141,13 @@ define(['pixi'], function (PIXI) {
 			//fallingItem.position.y += 2;
             
             //SetGameState(EGameState.RUNNING);
-        
+            
+            if(debug_mode)
+            {
+                fps_stat.tick();
+            }
+            //fps_stat.tick;
+            
             if(IsGameState(EGameState.RUNNING))
             {   
                 PrintText("score",scoreCounter,500,10,0.5,0.5,true);
