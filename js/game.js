@@ -24,7 +24,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         };
         
         var EDropObjectType = {
-            HAZELNUT:   1,
+            HAZELNUT:   3,
             WASTE:      -1,
             APPLE:      10
         };
@@ -121,14 +121,14 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 //BASKET SIZE 32x32
                 if(basket.position.x > 17)
                 {
-                    basket.position.x = basket.position.x - 15;
+                    basket.position.x = basket.position.x - 18;
                 }		
 			}
 			// right arrow => 39
 			if(e.keyCode === 39){
                 if(basket.position.x < 493)
                 {
-                    basket.position.x = basket.position.x + 15;
+                    basket.position.x = basket.position.x + 18;
                 }	
 			}
 		}
@@ -245,6 +245,11 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                     {
                         amountOfLives--;
                     }
+                    else if(arrDropObjects[i].itemType == EDropObjectType.APPLE)
+                    {
+                        amountOfLives++;
+                        scoreCounter += (arrDropObjects[i].itemType + levelBonus);
+                    }
                     else
                     {
                         scoreCounter += (arrDropObjects[i].itemType + levelBonus);
@@ -323,7 +328,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 levelBonus = 0;
                 levelSquirrelSpeed = 2;
                 levelDropObjectMinSpeed = 1;
-                levelDropObjectMaxSpeed = 3;
+                levelDropObjectMaxSpeed = 2;
             }
             else if(state == ELevelState.LEVEL_2)
             {
@@ -331,15 +336,15 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 levelBonus = 5;
                 levelSquirrelSpeed = 5;
                 levelDropObjectMinSpeed = 1;
-                levelDropObjectMaxSpeed = 4;
+                levelDropObjectMaxSpeed = 3;
             }
             else if(state == ELevelState.LEVEL_3)
             {
                 levelDropInterval = 2000;
                 levelBonus = 10;
                 levelSquirrelSpeed = 7;
-                levelDropObjectMinSpeed = 3;
-                levelDropObjectMaxSpeed = 4;
+                levelDropObjectMinSpeed = 2;
+                levelDropObjectMaxSpeed = 3;
             }
         }
         
