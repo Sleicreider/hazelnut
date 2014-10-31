@@ -25,7 +25,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         
         var EDropObjectType = {
             HAZELNUT:   1,
-            WASTE:      -1,
+            WASTE:      -3,
             APPLE:      10
         };
         
