@@ -240,7 +240,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                     }
                     else
                     {
-                        scoreCounter += arrDropObjects[i].itemType;
+                        scoreCounter += (arrDropObjects[i].itemType + levelBonus);
                     }
                              
                     stage.removeChild(arrDropObjects[i].item);
