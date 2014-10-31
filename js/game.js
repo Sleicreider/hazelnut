@@ -48,8 +48,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         var enemyPreviousPositionX = 0;
         
         //Random value for squirrel to drop a object
-        var randDropWaitValue = Math.floor(Math.random() *(5 - 1 + 1)) + 1; /**< START INTERVAL 1 - 1 seconds */
-        var previousDropTime = (new Date().getSeconds());
+        var randDropWaitValue = Math.floor(Math.random() *(3000 - 1 + 1)) + 1; /**< START INTERVAL 1 - 1 milliseconds */
+        var previousDropTime = (Date.now());
         
         var arrDropObjects = new Array();
         
@@ -312,7 +312,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         {
             if(state == ELevelState.LEVEL_1)
             {
-                levelDropInterval = 5;
+                levelDropInterval = 5000;
                 levelBonus = 0;
                 levelSquirrelSpeed = 2;
                 levelDropObjectMinSpeed = 1;
@@ -320,19 +320,19 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             }
             else if(state == ELevelState.LEVEL_2)
             {
-                levelDropInterval = 3;
+                levelDropInterval = 3000;
                 levelBonus = 5;
                 levelSquirrelSpeed = 5;
                 levelDropObjectMinSpeed = 1;
-                levelDropObjectMaxSpeed = 5;
+                levelDropObjectMaxSpeed = 4;
             }
             else if(state == ELevelState.LEVEL_3)
             {
-                levelDropInterval = 2;
+                levelDropInterval = 2000;
                 levelBonus = 10;
                 levelSquirrelSpeed = 7;
                 levelDropObjectMinSpeed = 3;
-                levelDropObjectMaxSpeed = 5;
+                levelDropObjectMaxSpeed = 4;
             }
         }
         
@@ -357,13 +357,13 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 				}
 			}
 					
-            if((previousDropTime + randDropWaitValue) < (new Date().getSeconds()))
+            if((previousDropTime + randDropWaitValue) < (Date.now()))
             {
                 createAndAddItem();
-                randDropWaitValue = Math.floor(Math.random() *(5 - 1 + 1)) + 1;
-                previousDropTime = (new Date().getSeconds());
+                randDropWaitValue = Math.floor(Math.random() *(levelDropInterval - levelDropInterval/3 + 1)) + levelDropInterval/3;
+                previousDropTime = (Date.now());
             }
-            if((previousDropTime + randDropWaitValue) > 15 && (new Date().getSeconds()) < 7)
+            if((previousDropTime + randDropWaitValue) > 15 && (Date.now()) < 7)
             {
             	previousDropTime = 0;
             }
