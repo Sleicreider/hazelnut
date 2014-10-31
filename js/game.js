@@ -25,11 +25,13 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         
         var EDropObjectType = {
             HAZELNUT:   1,
-            WASTE:      -3,
+            WASTE:      -1,
             APPLE:      10
         };
         
-        var currentState = EGameState.RUNNING;
+    
+        //amount of LIVES
+        var amountOfLives = 5;
         
         //Random value for squirrel
         var dstPositonX = Math.floor(Math.random() *(512 - 0 + 1)) + 0;; /**< 0 - 512 x coords */
@@ -43,16 +45,16 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         
         var dropObjectSpeed = 2;
         var scoreCounter = 0;
-        var missCounter = 0;
         var previousScoreCounter = -1;
-        var scoretext = new PIXI.Text(scoreCounter);
-        var previousScoreText = 0;
         
         var textGameOver = "GAME OVER";
 		/**************************************************/
         
         /**************** DEBUG DECLARATION SECTION **********************/
         var debug_mode = true;
+        
+        //For Testing set GameState to RUNNING
+        var currentState = EGameState.RUNNING;
         
         var fps_stat = new FPSMeter();
         /*****************************************************************/
@@ -171,22 +173,19 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 		}
 		
 		function updateItem() {
-
-			//fallingItem.position.y += 2;
-            
-            //SetGameState(EGameState.RUNNING);
             
             if(debug_mode)
             {
                 fps_stat.tick();
             }
-            //fps_stat.tick;
             
             if(IsGameState(EGameState.RUNNING))
             {   
-                PrintText("score",scoreCounter,500,10,0.5,0.5,true);
+                PrintText("score",scoreCounter,490,20,0.5,0.5,true);
                 
-                if(missCounter >= 5)
+                //create a pointsystem and livesystem function for this
+                PrintText("lives","LIVES: " + amountOfLives,(512/2),20,0.5,0.5,true);
+                if(amountOfLives <= 0)
                 {
                     SetGameState(EGameState.GAMEOVER);
                 }
@@ -199,7 +198,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             
             if(IsGameState(EGameState.GAMEOVER))
             {   
-                PrintText("gameover","GAME OVER",(512/2),(512/2),0.5,0.5,false);
+                PrintText("gameover",textGameOver,(512/2),(512/2),0.5,0.5,false);
             }    
 		}
         
@@ -209,8 +208,15 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             {
                 if( collision(arrDropObjects[i].item, basket, 10, 10) )
                 { 
-                    scoreCounter += arrDropObjects[i].itemType;
-                    
+                    if(arrDropObjects[i].itemType == EDropObjectType.WASTE)
+                    {
+                        amountOfLives--;
+                    }
+                    else
+                    {
+                        scoreCounter += arrDropObjects[i].itemType;
+                    }
+                             
                     stage.removeChild(arrDropObjects[i].item);
                     arrDropObjects.splice(i,1);
                 }
@@ -268,8 +274,13 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 				if(arrDropObjects[i].item.position.y >= 510)
                 {	
                     stage.removeChild(arrDropObjects[i].item);
-                    arrDropObjects.splice(i,1);
-                    missCounter++;
+                    
+                    if(arrDropObjects[i].itemType == EDropObjectType.APPLE || arrDropObjects[i].itemType == EDropObjectType.HAZELNUT)
+                    {
+                        amountOfLives--;
+                    }  
+                    
+                    arrDropObjects.splice(i,1);   
 				}
 			}
 					
