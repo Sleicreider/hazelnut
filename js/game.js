@@ -2,7 +2,9 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 
 	var startGame = function(){
 	
-		var itemTexture = PIXI.Texture.fromImage("img/hazelnut.png");
+		var texHazelnut = PIXI.Texture.fromImage("img/hazelnut.png");
+        var texWaste = PIXI.Texture.fromImage("img/waste.png");
+        var texApple = PIXI.Texture.fromImage("img/apple.png");
 	
 		var rendererHeight = 512;
 		var rendererWidth = 512;
@@ -21,6 +23,12 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             OFF:        7,
         };
         
+        var EDropObjectType = {
+            HAZELNUT:   1,
+            WASTE:      -1,
+            APPLE:      10
+        };
+        
         var currentState = EGameState.RUNNING;
         
         //Random value for squirrel
@@ -31,7 +39,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         var randDropWaitValue = Math.floor(Math.random() *(5 - 1 + 1)) + 1; /**< 5 - 1 seconds */
         var previousDropTime = (new Date().getSeconds());
         
-        var vec = new Array();
+        var arrDropObjects = new Array();
         
         var dropObjectSpeed = 2;
         var scoreCounter = 0;
@@ -122,14 +130,40 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 		}
 		
 		function createAndAddItem() {
-			fallingItem = new PIXI.Sprite(itemTexture);
+			var dropObject = {
+                item:       "",
+                itemType:   ""
+            };            
+               
+            var randItemTypeValue = Math.floor(Math.random() *(100 - 1 + 1)) + 1;
+            
+            if(randItemTypeValue <= 50)
+            {
+                dropObject.itemType = EDropObjectType.HAZELNUT;
+                texType = texHazelnut;
+            }
+            else if(randItemTypeValue > 50 && randItemTypeValue <= 80)
+            {
+                dropObject.itemType = EDropObjectType.WASTE;
+                texType = texWaste;
+            }
+            else if(randItemTypeValue > 80)
+            {
+                dropObject.itemType = EDropObjectType.APPLE;
+                texType = texApple;
+            }
+            
+            
+            fallingItem = new PIXI.Sprite(texType);
 			fallingItem.anchor.x = 0.5;
 			fallingItem.anchor.y = 0.5;
 			//fallingItem.position.x = getRandomStartingPoint();
 			fallingItem.position.x = squirrel.position.x;
             fallingItem.position.y = 50;
-			vec.push(fallingItem);
-			stage.addChild(fallingItem);
+            
+            dropObject.item = fallingItem;
+            stage.addChild(fallingItem);
+			arrDropObjects.push(dropObject);
 		}
 	
 		function getRandomStartingPoint() {
@@ -171,13 +205,14 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         
         function CheckColliosion()
         {
-            for(var i = 0; i < vec.length;i++)
+            for(var i = 0; i < arrDropObjects.length;i++)
             {
-                if( collision(vec[i], basket, 10, 10) )
+                if( collision(arrDropObjects[i].item, basket, 10, 10) )
                 { 
-                    scoreCounter++;
-                    stage.removeChild(vec[i]);
-                    vec.splice(i,1);
+                    scoreCounter += arrDropObjects[i].itemType;
+                    
+                    stage.removeChild(arrDropObjects[i].item);
+                    arrDropObjects.splice(i,1);
                 }
             }
         }
@@ -226,14 +261,14 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         function AIDropObject()
         {
         	//Move Dropped Objects           
-            for(var i = 0; i < vec.length;i++)
+            for(var i = 0; i < arrDropObjects.length;i++)
 			{
-				vec[i].position.y += 2;
-				
-				if(vec[i].position.y >= 510)
-				{	
-                    stage.removeChild(vec[i]);
-                    vec.splice(i,1);
+				arrDropObjects[i].item.position.y += 2;
+                
+				if(arrDropObjects[i].item.position.y >= 510)
+                {	
+                    stage.removeChild(arrDropObjects[i].item);
+                    arrDropObjects.splice(i,1);
                     missCounter++;
 				}
 			}
