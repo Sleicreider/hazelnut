@@ -29,21 +29,43 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             APPLE:      10
         };
         
+        var ELevelState = {
+            LEVEL_1:    1,
+            LEVEL_2:    2,
+            LEVEL_3:    3,
+            LEVEL_4:    4,
+            LEVEL_5:    5,
+            LEVEL_6:    6
+        };
+        
+        
     
         //amount of LIVES
         var amountOfLives = 5;
         
         //Random value for squirrel
-        var dstPositonX = Math.floor(Math.random() *(512 - 0 + 1)) + 0;; /**< 0 - 512 x coords */
+        var dstPositonX = Math.floor(Math.random() *(512 - 0 + 1)) + 0;; /**< START  0 - 512 x coords */
         var enemyPreviousPositionX = 0;
         
         //Random value for squirrel to drop a object
-        var randDropWaitValue = Math.floor(Math.random() *(5 - 1 + 1)) + 1; /**< 5 - 1 seconds */
+        var randDropWaitValue = Math.floor(Math.random() *(5 - 1 + 1)) + 1; /**< START INTERVAL 1 - 1 seconds */
         var previousDropTime = (new Date().getSeconds());
         
         var arrDropObjects = new Array();
         
         var dropObjectSpeed = 2;
+        
+        var levelDropInterval       = 0;
+        var levelAppleDropRate      = 0;
+        var levelWasteDropRate      = 0;
+        var levelHazelnutDropRate   = 0;
+        var levelBonus              = 0;
+        var levelSquirrelSpeed      = 0;
+        var levelDropObjectMinSpeed = 0;
+        var levelDropObjectMaxSpeed = 0;
+        
+        var levelStateMachine = new StateMachine();
+        
         var scoreCounter = 0;
         var previousScoreCounter = -1;
         
@@ -54,7 +76,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         var debug_mode = true;
         
         //For Testing set GameState to RUNNING
-        var currentState = EGameState.RUNNING;
+        var currentGameState = EGameState.RUNNING;
+        
         
         var fps_stat = new FPSMeter();
         /*****************************************************************/
@@ -73,7 +96,6 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 		var renderer = new PIXI.autoDetectRenderer(rendererWidth, rendererHeight); //WebGLRenderer(512, 512)
 		
 		createAndAddSprites();
-		createAndAddItem();
 		
 		window.onkeydown = keyDEvent;
 
@@ -134,7 +156,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 		function createAndAddItem() {
 			var dropObject = {
                 item:       "",
-                itemType:   ""
+                itemType:   "",
+                speed:      "",
             };            
                
             var randItemTypeValue = Math.floor(Math.random() *(100 - 1 + 1)) + 1;
@@ -155,6 +178,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 texType = texApple;
             }
             
+            var randSpeed = Math.floor(Math.random() *(levelDropObjectMaxSpeed - levelDropObjectMinSpeed + 1)) + levelDropObjectMinSpeed;
+            dropObject.speed = randSpeed;
             
             fallingItem = new PIXI.Sprite(texType);
 			fallingItem.anchor.x = 0.5;
@@ -194,6 +219,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 
                 CheckColliosion();
                 AIMovement();
+                LevelSystem(scoreCounter);
             }
             
             if(IsGameState(EGameState.GAMEOVER))
@@ -250,17 +276,64 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             if(dstPositonX > enemyPositionX)
             {
                 enemyPreviousPositionX = enemyPositionX;
-                enemyPositionX +=5;
+                enemyPositionX += levelSquirrelSpeed;
             }
             else
             {
                 enemyPreviousPositionX = enemyPositionX;
-                enemyPositionX -=5;
+                enemyPositionX -= levelSquirrelSpeed;
             }
             
             squirrel.position.x = enemyPositionX; 
             
             AIDropObject();
+        }
+
+        function LevelSystem(scoreCounter)
+        {
+            //var levelStateMachine = new StateMachine();
+            if(scoreCounter <= 15)
+            {
+                levelStateMachine.SetState(ELevelState.LEVEL_1);
+            }
+            else if(scoreCounter > 15 && scoreCounter <= 35)
+            {
+                levelStateMachine.SetState(ELevelState.LEVEL_2);
+            }
+            else if(scoreCounter > 35)
+            {
+                levelStateMachine.SetState(ELevelState.LEVEL_3);
+            }
+            
+            LevelSettings(levelStateMachine.GetState());
+        }
+        
+        function LevelSettings(state)
+        {
+            if(state == ELevelState.LEVEL_1)
+            {
+                levelDropInterval = 5;
+                levelBonus = 0;
+                levelSquirrelSpeed = 2;
+                levelDropObjectMinSpeed = 1;
+                levelDropObjectMaxSpeed = 3;
+            }
+            else if(state == ELevelState.LEVEL_2)
+            {
+                levelDropInterval = 3;
+                levelBonus = 5;
+                levelSquirrelSpeed = 5;
+                levelDropObjectMinSpeed = 1;
+                levelDropObjectMaxSpeed = 5;
+            }
+            else if(state == ELevelState.LEVEL_3)
+            {
+                levelDropInterval = 2;
+                levelBonus = 10;
+                levelSquirrelSpeed = 7;
+                levelDropObjectMinSpeed = 3;
+                levelDropObjectMaxSpeed = 5;
+            }
         }
         
         
@@ -269,7 +342,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         	//Move Dropped Objects           
             for(var i = 0; i < arrDropObjects.length;i++)
 			{
-				arrDropObjects[i].item.position.y += 2;
+				arrDropObjects[i].item.position.y += arrDropObjects[i].speed;
                 
 				if(arrDropObjects[i].item.position.y >= 510)
                 {	
@@ -300,12 +373,12 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         /***************** BEGIN GAMESTATE SECTION *****************/
         function SetGameState(state)
         {
-            currentState = state;
+            currentGameState = state;
         }
           
         function IsGameState(state)
         {
-            if(currentState == state)
+            if(currentGameState == state)
             {
                 return true;
             }
@@ -380,6 +453,23 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 stage.removeChild(frameworkTextArray[id]);
                 frameworkTextArray[id] = null;
             }
+        }
+         
+        //CREATE A STATEMACHINE?
+        //add all states to a array, each state calls a fuction
+        
+        function StateMachine()
+        {
+                var currentState = -1;
+        }
+        
+        StateMachine.prototype.SetState = function(state)
+        {
+            this.currentState = state;
+        }
+        StateMachine.prototype.GetState = function()
+        {
+            return this.currentState;
         }
         
         /**************** BEGIN FRAMEWORK ****************/
