@@ -118,11 +118,18 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 		function keyDEvent(e) {
 			// left arrow => 37
 			if(e.keyCode === 37){
-				basket.position.x = basket.position.x - 15;
+                //BASKET SIZE 32x32
+                if(basket.position.x > 17)
+                {
+                    basket.position.x = basket.position.x - 15;
+                }		
 			}
 			// right arrow => 39
 			if(e.keyCode === 39){
-				basket.position.x = basket.position.x + 15;
+                if(basket.position.x < 493)
+                {
+                    basket.position.x = basket.position.x + 15;
+                }	
 			}
 		}
 		
