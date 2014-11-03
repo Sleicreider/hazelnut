@@ -36,6 +36,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             LEVEL_4:    4,
             LEVEL_5:    5,
             LEVEL_6:    6,
+            LEVEL_7:    7,
+            LEVEL_8:    8,
             LEVEL_PEFORMANCE_TEST: 1337,
         };
         
@@ -87,6 +89,9 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         
         
         var fps_stat = new FPSMeter();
+        
+        //hide fps meter
+        fps_stat.hide();
         /*****************************************************************/
         
         /**************** FRAMEWORK DECLARATION SECTION ******************/
@@ -149,21 +154,20 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                     basket.position.x = basket.position.x + 18;
                 }	
 			}
-            if(e.keyCode == 79)
+            //DEBUGMODE KEYOPTIONS
+            if(e.keyCode == 48)
             {
                 if(debug_mode)
                 {
+                    fps_stat.hide();
                     debug_mode = false;
-                    //ClearText("debug");
                 }
                 else
                 {
+                    fps_stat.show();
                     debug_mode = true;
-                    //PrintText("debug","DEBUGMODE ON",250,500,0.5,0.5,false);
-                }
+                }    
             }
-            
-            //DEBUGMODE KEYOPTIONS
             if(debug_mode)
             {
                 if(e.keyCode == 85)
@@ -174,7 +178,6 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 {
                     amountOfLives++;
                 }
-                
             }
 
 		}
@@ -255,7 +258,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 		function updateItem() {
             dtNow = Date.now();
             dt = dtLast - dtNow;
-            console.log(dt);
+            console.log(dt); 
+            
             if(debug_mode)
             {
                 fps_stat.tick();
@@ -368,7 +372,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                         if(!debug_mode)
                         {
                             amountOfLives--;
-                        }
+                        } 
                     }  
                     
                     arrDropObjects.splice(i,1);   
@@ -401,17 +405,36 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             {
                 levelStateMachine.SetState(ELevelState.LEVEL_2);
             }
-            else if(scoreCounter > 35 && debug_mode == false)
+            else if(scoreCounter > 35 && scoreCounter <= 70)
             {
                 levelStateMachine.SetState(ELevelState.LEVEL_3);
             }
-            else if(scoreCounter > 35 && scoreCounter < 3000 && debug_mode == true)
+            else if(scoreCounter > 70 && scoreCounter <= 140)
             {
-                levelStateMachine.SetState(ELevelState.LEVEL_3);
+                levelStateMachine.SetState(ELevelState.LEVEL_4);
             }
-            else if(debug_mode == true && scoreCounter => 3000)
+            else if(scoreCounter > 140 && scoreCounter <= 220)
             {
-                levelStateMachine.SetState(ELevelState.LEVEL_PEFORMANCE_TEST);
+                levelStateMachine.SetState(ELevelState.LEVEL_5);
+            }
+            else if(scoreCounter > 220 && scoreCounter <= 350)
+            {
+                levelStateMachine.SetState(ELevelState.LEVEL_6);
+            }
+            else if(scoreCounter > 350 && scoreCounter <= 500)
+            {
+                levelStateMachine.SetState(ELevelState.LEVEL_7);
+            }
+            else if(scoreCounter > 500)
+            {
+                levelStateMachine.SetState(ELevelState.LEVEL_8);
+            }
+            if(debug_mode)
+            {
+                if(scoreCounter >= 3000)
+                {
+                    levelStateMachine.SetState(ELevelState.LEVEL_PEFORMANCE_TEST);
+                }
             }
             
             LevelSettings(levelStateMachine.GetState());
@@ -431,25 +454,70 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             else if(state == ELevelState.LEVEL_2)
             {
                 PrintTextSequence("lvl2","LEVEL 2",250,300,0.5,0.5,false,2000);
-                levelDropInterval = 3000;
-                levelBonus = 5;
-                levelSquirrelSpeed = 5;
+                levelDropInterval = 4000;
+                levelBonus = 2;
+                levelSquirrelSpeed = 2;
                 levelDropObjectMinSpeed = 1;
-                levelDropObjectMaxSpeed = 3;
+                levelDropObjectMaxSpeed = 2;
             }
             else if(state == ELevelState.LEVEL_3)
             {
                 PrintTextSequence("lvl3","LEVEL 3",250,300,0.5,0.5,false,2000);
-                levelDropInterval = 2000;
-                levelBonus = 10;
+                levelDropInterval = 4000;
+                levelBonus = 4;
+                levelSquirrelSpeed = 4;
+                levelDropObjectMinSpeed = 1;
+                levelDropObjectMaxSpeed = 3;
+            }
+            else if(state == ELevelState.LEVEL_4)
+            {
+                PrintTextSequence("lvl4","LEVEL 4",250,300,0.5,0.5,false,2000);
+                levelDropInterval = 4000;
+                levelBonus = 5;
+                levelSquirrelSpeed = 5;
+                levelDropObjectMinSpeed = 2;
+                levelDropObjectMaxSpeed = 3;
+            }
+            else if(state == ELevelState.LEVEL_5)
+            {
+                PrintTextSequence("lvl5","LEVEL 5",250,300,0.5,0.5,false,2000);
+                levelDropInterval = 3000;
+                levelBonus = 7;
                 levelSquirrelSpeed = 7;
                 levelDropObjectMinSpeed = 2;
                 levelDropObjectMaxSpeed = 3;
             }
+            else if(state == ELevelState.LEVEL_6)
+            {
+                PrintTextSequence("lvl6","LEVEL 6",250,300,0.5,0.5,false,2000);
+                levelDropInterval = 4000;
+                levelBonus = 10;
+                levelSquirrelSpeed = 7;
+                levelDropObjectMinSpeed = 1;
+                levelDropObjectMaxSpeed = 4;
+            }
+            else if(state == ELevelState.LEVEL_7)
+            {
+                PrintTextSequence("lvl7","LEVEL 7",250,300,0.5,0.5,false,2000);
+                levelDropInterval = 4000;
+                levelBonus = 10;
+                levelSquirrelSpeed = 7;
+                levelDropObjectMinSpeed = 2;
+                levelDropObjectMaxSpeed = 4;
+            }
+            else if(state == ELevelState.LEVEL_8)
+            {
+                PrintTextSequence("lvl8","LEVEL 8",250,300,0.5,0.5,false,2000);
+                levelDropInterval = 3000;
+                levelBonus = 12;
+                levelSquirrelSpeed = 7;
+                levelDropObjectMinSpeed = 2;
+                levelDropObjectMaxSpeed = 4;
+            }
             else if(state == ELevelState.LEVEL_PEFORMANCE_TEST)
             {
-                PrintTextSequence("lvl4","PERFORMANCE TEST",250,300,0.5,0.5,false,2000);
-                levelDropInterval = 5;
+                PrintTextSequence("lvlP","PERFORMANCE TEST",250,300,0.5,0.5,false,2000);
+                levelDropInterval = 50;
                 levelBonus = 100;
                 levelSquirrelSpeed = 100;
                 levelDropObjectMinSpeed = 1;
