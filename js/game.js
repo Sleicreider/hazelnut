@@ -35,8 +35,12 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             LEVEL_3:    3,
             LEVEL_4:    4,
             LEVEL_5:    5,
-            LEVEL_6:    6
+            LEVEL_6:    6,
+            LEVEL_PEFORMANCE_TEST: 1337,
         };
+        
+        var callCounterADD = 0;
+        var callCounterREMOVE = 0;
         
         
     
@@ -63,7 +67,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         var levelSquirrelSpeed      = 0;
         var levelDropObjectMinSpeed = 0;
         var levelDropObjectMaxSpeed = 0;
-        
+            
         var levelStateMachine = new StateMachine();
         
         var scoreCounter = 0;
@@ -77,6 +81,9 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         
         //For Testing set GameState to RUNNING
         var currentGameState = EGameState.RUNNING;
+        var dtLast = Date.now();
+        var dtNow = 0;
+        var dt = 0;
         
         
         var fps_stat = new FPSMeter();
@@ -87,6 +94,15 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         var frameworkText;
         var frameworkTextArray = new Object();
         var frameworkTextArrayContent = new Array();
+        
+        var frameworkTextSequenceObject = {
+            textObject:"",
+            startTime:"",
+            initialized: false
+        };
+        
+        var frameworkTextSequence = new Object();
+        var frameworkTextSequenceArray = new Array();
         /*****************************************************************/
 	
 		// create an new instance of a pixi stage
@@ -109,6 +125,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 			requestAnimFrame( animate );
 
 			updateItem();
+            
+            
 
 			// render the stage
 			renderer.render(stage);
@@ -121,16 +139,29 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 //BASKET SIZE 32x32
                 if(basket.position.x > 17)
                 {
-                    basket.position.x = basket.position.x - 18;
+                    basket.position.x = basket.position.x - (18*dt);
                 }		
 			}
 			// right arrow => 39
 			if(e.keyCode === 39){
                 if(basket.position.x < 493)
                 {
-                    basket.position.x = basket.position.x + 18;
+                    basket.position.x = basket.position.x + (18*dt);
                 }	
 			}
+            //DEBUGMODE KEYOPTIONS
+            if(debug_mode)
+            {
+                if(e.keyCode == 85)
+                {
+                    scoreCounter += 100;
+                }
+                if(e.keyCode == 76)
+                {
+                    amountOfLives++;
+                }
+            }
+
 		}
 		
 		function createAndAddSprites() {
@@ -197,7 +228,9 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             
             dropObject.item = fallingItem;
             stage.addChild(fallingItem);
-			arrDropObjects.push(dropObject);
+            
+            arrDropObjects.push(dropObject);
+            
 		}
 	
 		function getRandomStartingPoint() {
@@ -205,7 +238,9 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 		}
 		
 		function updateItem() {
-            
+            dtNow = Date.now();
+            dt = dtLast - dtNow;
+            console.log(dt);
             if(debug_mode)
             {
                 fps_stat.tick();
@@ -214,6 +249,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             if(IsGameState(EGameState.RUNNING))
             {   
                 PrintText("score",scoreCounter,490,20,0.5,0.5,true);
+                //PrintTextSequence("score",scoreCounter,490,20,0.5,0.5,true,3000);
+                PrintTextSequence("sss",Date.now(),250,300,0.5,0.5,false,3000);
                 
                 //create a pointsystem and livesystem function for this
                 PrintText("lives","LIVES: " + amountOfLives,(512/2),20,0.5,0.5,true);
@@ -233,6 +270,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             {   
                 PrintText("gameover",textGameOver,(512/2),(512/2),0.5,0.5,false);
             }    
+            dtLast = Date.now();
 		}
         
         function CheckColliosion()
@@ -300,10 +338,45 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             
             AIDropObject();
         }
-
+       
+        function AIDropObject()
+        {
+        	//Move Dropped Objects           
+            for(var i = 0; i < arrDropObjects.length;i++)
+			{
+				arrDropObjects[i].item.position.y += arrDropObjects[i].speed;
+                
+				if(arrDropObjects[i].item.position.y >= 510)
+                {	
+                    stage.removeChild(arrDropObjects[i].item);
+                    
+                    if(arrDropObjects[i].itemType == EDropObjectType.APPLE || arrDropObjects[i].itemType == EDropObjectType.HAZELNUT)
+                    {
+                        //amountOfLives--;
+                    }  
+                    
+                    arrDropObjects.splice(i,1);   
+				}
+			}
+					
+            if((previousDropTime + randDropWaitValue) < (Date.now()))
+            {
+                createAndAddItem();
+                randDropWaitValue = Math.floor(Math.random() *(levelDropInterval - levelDropInterval/3 + 1)) + levelDropInterval/3;
+                previousDropTime = (Date.now());
+            }
+            if((previousDropTime + randDropWaitValue) > 15 && (Date.now()) < 7)
+            {
+            	previousDropTime = 0;
+            }
+        }
+        /***************** END AI SECTION *****************/
+        
+        /***************** BEGIN LEVEL SECTION *****************/
         function LevelSystem(scoreCounter)
         {
             //var levelStateMachine = new StateMachine();
+            
             if(scoreCounter <= 15)
             {
                 levelStateMachine.SetState(ELevelState.LEVEL_1);
@@ -312,9 +385,13 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             {
                 levelStateMachine.SetState(ELevelState.LEVEL_2);
             }
-            else if(scoreCounter > 35)
+            else if(scoreCounter > 35 && scoreCounter <= 3000)
             {
                 levelStateMachine.SetState(ELevelState.LEVEL_3);
+            }
+            else if(debug_mode && scoreCounter > 3000)
+            {
+                levelStateMachine.SetState(ELevelState.LEVEL_PEFORMANCE_TEST);
             }
             
             LevelSettings(levelStateMachine.GetState());
@@ -346,41 +423,17 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 levelDropObjectMinSpeed = 2;
                 levelDropObjectMaxSpeed = 3;
             }
-        }
-        
-        
-        function AIDropObject()
-        {
-        	//Move Dropped Objects           
-            for(var i = 0; i < arrDropObjects.length;i++)
-			{
-				arrDropObjects[i].item.position.y += arrDropObjects[i].speed;
-                
-				if(arrDropObjects[i].item.position.y >= 510)
-                {	
-                    stage.removeChild(arrDropObjects[i].item);
-                    
-                    if(arrDropObjects[i].itemType == EDropObjectType.APPLE || arrDropObjects[i].itemType == EDropObjectType.HAZELNUT)
-                    {
-                        amountOfLives--;
-                    }  
-                    
-                    arrDropObjects.splice(i,1);   
-				}
-			}
-					
-            if((previousDropTime + randDropWaitValue) < (Date.now()))
+            else if(state == ELevelState.LEVEL_PEFORMANCE_TEST)
             {
-                createAndAddItem();
-                randDropWaitValue = Math.floor(Math.random() *(levelDropInterval - levelDropInterval/3 + 1)) + levelDropInterval/3;
-                previousDropTime = (Date.now());
+                levelDropInterval = 100;
+                levelBonus = 100;
+                levelSquirrelSpeed = 50;
+                levelDropObjectMinSpeed = 10;
+                levelDropObjectMaxSpeed = 15;
             }
-            if((previousDropTime + randDropWaitValue) > 15 && (Date.now()) < 7)
-            {
-            	previousDropTime = 0;
-            }
+            
         }
-        /***************** END AI SECTION *****************/
+        /***************** END ALEVEL SECTION *****************/
         
         /***************** BEGIN GAMESTATE SECTION *****************/
         function SetGameState(state)
@@ -430,6 +483,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 stage.addChild(frameworkText);
                 
                 frameworkTextArray[id] = frameworkText;
+                
+                
             }
             
             //If id is available check if it is null, if so then print
@@ -437,9 +492,10 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             {
                 if(frameworkTextArray[id] == null || updateAble == true)
                 {
+                    console.log("DRAW TEXT");
                     if(updateAble)
                     {
-                        stage.removeChild(frameworkTextArray[id])
+                        stage.removeChild(frameworkTextArray[id]);
                     }
                     
                     frameworkText = new PIXI.Text(text);
@@ -451,8 +507,74 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                     stage.addChild(frameworkText);
                 
                     frameworkTextArray[id] = frameworkText;
+                    
+                    console.log("ADD=" + callCounterADD + " REMOVE="+callCounterREMOVE);
                 }
             }
+        }
+        
+        function PrintTextSequence(id,text,posX,posY,anchorX,anchorY,updateAble,milliSeconds)
+        {
+            
+            //if id is not available
+            if(!(id in frameworkTextSequence))
+            {
+                frameworkTextSequence[id] = frameworkTextSequenceObject;
+                
+                frameworkText = new PIXI.Text(text);
+                frameworkText.position.x = posX;
+                frameworkText.position.y = posY;
+                frameworkText.anchor.x = anchorX;
+                frameworkText.anchor.y = anchorY;
+                
+                stage.addChild(frameworkText);
+                
+                frameworkTextSequence[id].textObject = frameworkText;
+                frameworkTextSequence[id].startTime = Date.now();
+                frameworkTextSequence[id].initialized = true;
+            }
+            
+            //If id is available check if it is null, if so then print
+            if(id in frameworkTextSequence)
+            {
+               if(frameworkTextSequence[id] == null || updateAble == true)
+                {
+                    if(updateAble)
+                    {
+                        stage.removeChild(frameworkTextSequence[id].textObject);
+                    }
+                    if(frameworkTextSequence[id] == null)
+                    {
+                        frameworkTextSequence[id] = frameworkTextSequenceObject;
+                    }
+                    
+                    frameworkText = new PIXI.Text(text);
+                    frameworkText.position.x = posX;
+                    frameworkText.position.y = posY;
+                    frameworkText.anchor.x = anchorX;
+                    frameworkText.anchor.y = anchorY;
+                
+                    stage.addChild(frameworkText);
+                
+                    frameworkTextSequence[id].textObject = frameworkText;
+                    
+                    if(!frameworkTextSequence[id].initialized)
+                    {
+                        frameworkTextSequence[id].startTime = Date.now();
+                        frameworkTextSequence[id].initialized = true;
+                    }
+                }
+            if(frameworkTextSequence[id] != null)
+            {
+                if((frameworkTextSequence[id].startTime + milliSeconds) <= Date.now())
+                {
+                    stage.removeChild(frameworkTextSequence[id].textObject);
+                    frameworkTextSequence[id] = null;
+                }
+            }
+            
+          }
+
         }
         
         /**
