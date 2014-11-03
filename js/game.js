@@ -77,7 +77,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 		/**************************************************/
         
         /**************** DEBUG DECLARATION SECTION **********************/
-        var debug_mode = true;
+        var debug_mode = false;
         
         //For Testing set GameState to RUNNING
         var currentGameState = EGameState.RUNNING;
@@ -149,6 +149,20 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                     basket.position.x = basket.position.x + 18;
                 }	
 			}
+            if(e.keyCode == 79)
+            {
+                if(debug_mode)
+                {
+                    debug_mode = false;
+                    //ClearText("debug");
+                }
+                else
+                {
+                    debug_mode = true;
+                    //PrintText("debug","DEBUGMODE ON",250,500,0.5,0.5,false);
+                }
+            }
+            
             //DEBUGMODE KEYOPTIONS
             if(debug_mode)
             {
@@ -160,6 +174,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 {
                     amountOfLives++;
                 }
+                
             }
 
 		}
@@ -350,7 +365,10 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                     
                     if(arrDropObjects[i].itemType == EDropObjectType.APPLE || arrDropObjects[i].itemType == EDropObjectType.HAZELNUT)
                     {
-                        //amountOfLives--;
+                        if(!debug_mode)
+                        {
+                            amountOfLives--;
+                        }
                     }  
                     
                     arrDropObjects.splice(i,1);   
@@ -383,11 +401,15 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             {
                 levelStateMachine.SetState(ELevelState.LEVEL_2);
             }
-            else if(scoreCounter > 35 && scoreCounter <= 3000)
+            else if(scoreCounter > 35 && debug_mode == false)
             {
                 levelStateMachine.SetState(ELevelState.LEVEL_3);
             }
-            else if(debug_mode && scoreCounter > 3000)
+            else if(scoreCounter > 35 && scoreCounter < 3000 && debug_mode == true)
+            {
+                levelStateMachine.SetState(ELevelState.LEVEL_3);
+            }
+            else if(debug_mode == true && scoreCounter => 3000)
             {
                 levelStateMachine.SetState(ELevelState.LEVEL_PEFORMANCE_TEST);
             }
@@ -427,11 +449,11 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             else if(state == ELevelState.LEVEL_PEFORMANCE_TEST)
             {
                 PrintTextSequence("lvl4","PERFORMANCE TEST",250,300,0.5,0.5,false,2000);
-                levelDropInterval = 100;
+                levelDropInterval = 5;
                 levelBonus = 100;
-                levelSquirrelSpeed = 50;
-                levelDropObjectMinSpeed = 10;
-                levelDropObjectMaxSpeed = 15;
+                levelSquirrelSpeed = 100;
+                levelDropObjectMinSpeed = 1;
+                levelDropObjectMaxSpeed = 10;
             }
             
         }
