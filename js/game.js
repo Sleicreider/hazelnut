@@ -249,8 +249,6 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             if(IsGameState(EGameState.RUNNING))
             {   
                 PrintText("score",scoreCounter,490,20,0.5,0.5,true);
-                //PrintTextSequence("score",scoreCounter,490,20,0.5,0.5,true,3000);
-                PrintTextSequence("sss",Date.now(),250,300,0.5,0.5,false,3000);
                 
                 //create a pointsystem and livesystem function for this
                 PrintText("lives","LIVES: " + amountOfLives,(512/2),20,0.5,0.5,true);
@@ -401,6 +399,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         {
             if(state == ELevelState.LEVEL_1)
             {
+                PrintTextSequence("lvl1","LEVEL 1",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 5000;
                 levelBonus = 0;
                 levelSquirrelSpeed = 2;
@@ -409,6 +408,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             }
             else if(state == ELevelState.LEVEL_2)
             {
+                PrintTextSequence("lvl2","LEVEL 2",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 3000;
                 levelBonus = 5;
                 levelSquirrelSpeed = 5;
@@ -417,6 +417,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             }
             else if(state == ELevelState.LEVEL_3)
             {
+                PrintTextSequence("lvl3","LEVEL 3",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 2000;
                 levelBonus = 10;
                 levelSquirrelSpeed = 7;
@@ -425,6 +426,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             }
             else if(state == ELevelState.LEVEL_PEFORMANCE_TEST)
             {
+                PrintTextSequence("lvl4","PERFORMANCE TEST",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 100;
                 levelBonus = 100;
                 levelSquirrelSpeed = 50;
