@@ -139,14 +139,14 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 //BASKET SIZE 32x32
                 if(basket.position.x > 17)
                 {
-                    basket.position.x = basket.position.x - (18*dt);
+                    basket.position.x = basket.position.x - 18;
                 }		
 			}
 			// right arrow => 39
 			if(e.keyCode === 39){
                 if(basket.position.x < 493)
                 {
-                    basket.position.x = basket.position.x + (18*dt);
+                    basket.position.x = basket.position.x + 18;
                 }	
 			}
             //DEBUGMODE KEYOPTIONS
