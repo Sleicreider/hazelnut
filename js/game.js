@@ -23,6 +23,14 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             OFF:        7,
         };
         
+        var gameStateArray = new Array();
+        
+        var ERunningState = {
+            RUNNING:     1,
+            LEVELUP:    2,
+            PAUSED:     3,
+        };
+        
         var EDropObjectType = {
             HAZELNUT:   3,
             WASTE:      -1,
@@ -69,8 +77,6 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         var levelSquirrelSpeed      = 0;
         var levelDropObjectMinSpeed = 0;
         var levelDropObjectMaxSpeed = 0;
-            
-        var levelStateMachine = new StateMachine();
         
         var scoreCounter = 0;
         var previousScoreCounter = -1;
@@ -82,7 +88,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         var debug_mode = false;
         
         //For Testing set GameState to RUNNING
-        var currentGameState = EGameState.RUNNING;
+        var currentGameState;
+        
         var dtLast = Date.now();
         var dtNow = 0;
         var dt = 0;
@@ -92,9 +99,46 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         
         //hide fps meter
         fps_stat.hide();
+        
         /*****************************************************************/
         
         /**************** FRAMEWORK DECLARATION SECTION ******************/
+        //var StateMachine = {};
+        
+        function StateMachine()
+        {
+                this.currentState = -1;
+                this.stateArray = new Array();
+        }
+        
+        StateMachine.prototype.SetState = function(state)
+        {
+            this.currentState = state;
+            
+            this.stateArray.push(state);
+            
+            if(this.stateArray.length > 2)
+            {
+                this.stateArray.splice(0,1);
+            }
+        }
+        
+        StateMachine.prototype.GetState = function()
+        {
+            return this.currentState;
+        }
+        
+        StateMachine.prototype.GetPreviousState = function()
+        {
+            if(this.stateArray.length < 2)
+            {
+                return -1;
+            }
+            else
+            {
+                return this.stateArray[0];
+            }
+        }
         
         var frameworkText;
         var frameworkTextArray = new Object();
@@ -109,6 +153,12 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         var frameworkTextSequence = new Object();
         var frameworkTextSequenceArray = new Array();
         /*****************************************************************/
+        
+        //Only needed when game starts !
+        //var levelStateMachine = new StateMachine();
+        //var inGameStateMachine = new StateMachine();
+        var levelStateMachine = new StateMachine();
+        var inGameStateMachine = new StateMachine();
 	
 		// create an new instance of a pixi stage
 		var stage = new PIXI.Stage(0x000000);
@@ -124,6 +174,10 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 		document.body.appendChild(renderer.view);
 
 		requestAnimFrame( animate );
+        
+        //STARTING GAMESTATE IS;
+        SetGameState(EGameState.RUNNING);
+        inGameStateMachine.SetState(ERunningState.RUNNING);
 
 		function animate() {
 
@@ -154,6 +208,22 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                     basket.position.x = basket.position.x + 18;
                 }	
 			}
+            if(IsGameState(EGameState.RUNNING))
+            {
+                if(e.keyCode == 80)
+                {
+                    if(inGameStateMachine.GetState == ERunningState.PAUSED)
+                    {
+                        //test if previouse is running & if previouse is levelup
+                        inGameStateMachine.SetState(ERunningState.RUNNING);
+                    }
+                    else
+                    {
+                        inGameStateMachine.SetState(ERunningState.PAUSED);
+                    }
+                }
+            }
+            
             //DEBUGMODE KEYOPTIONS
             if(e.keyCode == 48)
             {
@@ -257,8 +327,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
 		
 		function updateItem() {
             dtNow = Date.now();
-            dt = dtLast - dtNow;
-            console.log(dt); 
+            dt = dtNow - dtLast;
+            //console.log(dt); 
             
             if(debug_mode)
             {
@@ -267,25 +337,58 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             
             if(IsGameState(EGameState.RUNNING))
             {   
-                PrintText("score",scoreCounter,490,20,0.5,0.5,true);
-                
-                //create a pointsystem and livesystem function for this
-                PrintText("lives","LIVES: " + amountOfLives,(512/2),20,0.5,0.5,true);
-                if(amountOfLives <= 0)
+                if(inGameStateMachine.GetState() == ERunningState.RUNNING)
                 {
-                    SetGameState(EGameState.GAMEOVER);
+                    console.log("HAARARAERARE");
+                    PrintText("score",scoreCounter,490,20,0.5,0.5,true);
+                
+                    //create a pointsystem and livesystem function for this
+                    PrintText("lives","LIVES: " + amountOfLives,(512/2),20,0.5,0.5,true);
+                    if(amountOfLives <= 0)
+                    {
+                        SetGameState(EGameState.GAMEOVER);
+                    }
+
+                    previousScoreCounter = scoreCounter;
+
+                    CheckColliosion();
+                    AIMovement();
+                    LevelSystem(scoreCounter);
                 }
-
-                previousScoreCounter = scoreCounter;
-
-                CheckColliosion();
-                AIMovement();
-                LevelSystem(scoreCounter);
+                else if(inGameStateMachine.GetState() == ERunningState.PAUSED)
+                {
+                    PrintText("pause","PAUSED",(512/2),(512/2),0.5,0.5,false);
+                }
+                else if(inGameStateMachine.GetState() == ERunningState.LEVELUP)
+                {
+                    
+                }
+                
+                if(inGameStateMachine.GetPreviousState() == ERunningState.PAUSED)
+                {
+                    ClearText("paused");
+                }
             }
+            
+            /*if(IsGameState(EGameState.PAUSED))
+            {
+                PrintText("pause","PAUSED",(512/2),(512/2),0.5,0.5,false);
+            }
+            console.log(GetPreviousGameState());
+            console.log("LENGTH "+gameStateArray.length);
+            if(GetPreviousGameState() == EGameState.PAUSED)
+            {
+                
+                ClearText("pause");
+            }*/
             
             if(IsGameState(EGameState.GAMEOVER))
             {   
                 PrintText("gameover",textGameOver,(512/2),(512/2),0.5,0.5,false);
+                ClearText("lives");
+                ClearText("score");
+                
+                console.log(GetPreviousGameState());
             }    
             dtLast = Date.now();
 		}
@@ -437,7 +540,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 }
             }
             
-            LevelSettings(levelStateMachine.GetState());
+            LevelSettings(levelStateMachine.GetState);
         }
         
         function LevelSettings(state)
@@ -531,6 +634,25 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         function SetGameState(state)
         {
             currentGameState = state;
+            
+            gameStateArray.push(state);
+            
+            if(gameStateArray.length > 2)
+            {
+                gameStateArray.splice(0,1);
+            }
+        }
+        
+        function GetPreviousGameState()
+        {
+            if(gameStateArray.length < 2)
+            {
+                return -1;
+            }
+            else
+            {
+                return gameStateArray[0];
+            }
         }
           
         function IsGameState(state)
@@ -566,6 +688,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             //if id is not available
             if(!(id in frameworkTextArray))
             {
+                //console.log("NORMAL DRAW");
                 frameworkText = new PIXI.Text(text);
                 frameworkText.position.x = posX;
                 frameworkText.position.y = posY;
@@ -584,7 +707,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             {
                 if(frameworkTextArray[id] == null || updateAble == true)
                 {
-                    console.log("DRAW TEXT");
+                    //console.log("DRAW TEXT");
                     if(updateAble)
                     {
                         stage.removeChild(frameworkTextArray[id]);
@@ -599,8 +722,6 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                     stage.addChild(frameworkText);
                 
                     frameworkTextArray[id] = frameworkText;
-                    
-                    console.log("ADD=" + callCounterADD + " REMOVE="+callCounterREMOVE);
                 }
             }
         }
@@ -674,7 +795,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         */
         function ClearText(id)
         {
-            if(id in frameworkTextArray)
+            if(id in frameworkTextArray && frameworkTextArray[id] != null)
             {
                 stage.removeChild(frameworkTextArray[id]);
                 frameworkTextArray[id] = null;
@@ -684,19 +805,87 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         //CREATE A STATEMACHINE?
         //add all states to a array, each state calls a fuction
         
+    /*    var StateMachine = {
+            currentState: -1,
+            //stateArray: new Array(),
+            
+            SetState:   function(state)
+            {
+                this.currentState = state;
+            
+                stateArray.push(state);
+            
+                if(stateArray.length > 2)
+                {
+                    stateArray.splice(0,1);
+                }
+            },
+            
+            GetState:   function()
+            {
+                return this.currentState;
+            },
+            
+            GetPreviousState:   function()
+            {
+                 if(stateArray.length < 2)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return stateArray[0];
+                }
+            }
+        };*/
+        /*
         function StateMachine()
         {
                 var currentState = -1;
-        }
+                var stateArray = new Array();
+                var SetState = function SetState(state)
+                {
+                    this.currentState = state;
+            
+                    stateArray.push(state);
+            
+                    if(stateArray.length > 2)
+                    {
+                        stateArray.splice(0,1);
+                    }
+                };
+                
+                var GetState = function GetState()
+                {
+                    return this.currentState; 
+                };
+                
+                var GetPreviousState = function GetPreviousState()
+                {
+                    if(stateArray.length < 2)
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return stateArray[0];
+                    }
+                };
+        }*/
         
-        StateMachine.prototype.SetState = function(state)
+        
+        
+        /*StateMachine.prototype.GetPreviousState = function()
         {
-            this.currentState = state;
-        }
-        StateMachine.prototype.GetState = function()
-        {
-            return this.currentState;
-        }
+            if(stateArray.length < 2)
+            {
+                return -1;
+            }
+            else
+            {
+                return stateArray[0];
+            }
+        }*/
         
         /**************** BEGIN FRAMEWORK ****************/
         
