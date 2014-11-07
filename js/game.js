@@ -402,8 +402,6 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 PrintText("gameover",textGameOver,(512/2),(512/2),0.5,0.5,false);
                 ClearText("lives");
                 ClearText("score");
-                
-                console.log(GetPreviousGameState());
             }    
             dtLast = Date.now();
 		}
@@ -571,7 +569,6 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 if(levelStateMachine.GetState() != ELevelState.LEVEL_1)
                 {
                     inGameStateMachine.SetState(ERunningState.LEVELUP);
-                    console.log("GOT HERE");
                 }
                 
                 LevelSettings(levelStateMachine.GetState());
@@ -772,7 +769,6 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         
         function PrintTextSequence(id,text,posX,posY,anchorX,anchorY,updateAble,milliSeconds)
         {
-            console.log("GOGOGO");
             //if id is not available
             if(!(id in frameworkTextSequence))
             {
@@ -825,10 +821,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             {
                 if((frameworkTextSequence[id].startTime + milliSeconds) <= Date.now())
                 {
-                    console.log("!!!!!!!!!!!!!!!!!!! DELETE ");
                     stage.removeChild(frameworkTextSequence[id].textObject);
                     frameworkTextSequence[id] = null;
-                    console.log(id + " removed ");
                 }
             }
             
@@ -847,91 +841,6 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 frameworkTextArray[id] = null;
             }
         }
-         
-        //CREATE A STATEMACHINE?
-        //add all states to a array, each state calls a fuction
-        
-    /*    var StateMachine = {
-            currentState: -1,
-            //stateArray: new Array(),
-            
-            SetState:   function(state)
-            {
-                this.currentState = state;
-            
-                stateArray.push(state);
-            
-                if(stateArray.length > 2)
-                {
-                    stateArray.splice(0,1);
-                }
-            },
-            
-            GetState:   function()
-            {
-                return this.currentState;
-            },
-            
-            GetPreviousState:   function()
-            {
-                 if(stateArray.length < 2)
-                {
-                    return -1;
-                }
-                else
-                {
-                    return stateArray[0];
-                }
-            }
-        };*/
-        /*
-        function StateMachine()
-        {
-                var currentState = -1;
-                var stateArray = new Array();
-                var SetState = function SetState(state)
-                {
-                    this.currentState = state;
-            
-                    stateArray.push(state);
-            
-                    if(stateArray.length > 2)
-                    {
-                        stateArray.splice(0,1);
-                    }
-                };
-                
-                var GetState = function GetState()
-                {
-                    return this.currentState; 
-                };
-                
-                var GetPreviousState = function GetPreviousState()
-                {
-                    if(stateArray.length < 2)
-                    {
-                        return -1;
-                    }
-                    else
-                    {
-                        return stateArray[0];
-                    }
-                };
-        }*/
-        
-        
-        
-        /*StateMachine.prototype.GetPreviousState = function()
-        {
-            if(stateArray.length < 2)
-            {
-                return -1;
-            }
-            else
-            {
-                return stateArray[0];
-            }
-        }*/
         
         /**************** BEGIN FRAMEWORK ****************/
         
