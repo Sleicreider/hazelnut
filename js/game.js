@@ -248,9 +248,17 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             }
             if(debug_mode)
             {
+                if(e.keyCode == 74)
+                {
+                    scoreCounter += 3000;
+                }
                 if(e.keyCode == 85)
                 {
                     scoreCounter += 100;
+                }
+                if(e.keyCode == 73)
+                {
+                    scoreCounter += 10;
                 }
                 if(e.keyCode == 76)
                 {
@@ -664,8 +672,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 levelSquirrelSpeed = 100;
                 levelDropObjectMinSpeed = 1;
                 levelDropObjectMaxSpeed = 10;
-                levelSquirrelSize["width"] = 350;
-                levelSquirrelSize["height"] = 350;
+                levelSquirrelSize["width"] = 280;
+                levelSquirrelSize["height"] = 280;
             }
             
         }
