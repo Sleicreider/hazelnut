@@ -622,8 +622,8 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 levelDropInterval = 3000;
                 levelBonus = 7;
                 levelSquirrelSpeed = 7;
-                levelDropObjectMinSpeed = 200;
-                levelDropObjectMaxSpeed = 200;
+                levelDropObjectMinSpeed = 2;
+                levelDropObjectMaxSpeed = 3;
                 levelSquirrelSize["width"] = 180;
                 levelSquirrelSize["height"] = 180;
             }
