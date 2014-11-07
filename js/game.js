@@ -77,6 +77,14 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         var levelSquirrelSpeed      = 0;
         var levelDropObjectMinSpeed = 0;
         var levelDropObjectMaxSpeed = 0;
+        var levelSquirrelSize = new Object();
+        levelSquirrelSize["width"] = 64;
+        levelSquirrelSize["height"] = 64;
+        
+        //not used right now
+        var levelLevelUp = false;
+    
+        var reviousTickLevel;
         
         var scoreCounter = 0;
         var previousScoreCounter = -1;
@@ -212,7 +220,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             {
                 if(e.keyCode == 80)
                 {
-                    if(inGameStateMachine.GetState == ERunningState.PAUSED)
+                    if(inGameStateMachine.GetState() == ERunningState.PAUSED)
                     {
                         //test if previouse is running & if previouse is levelup
                         inGameStateMachine.SetState(ERunningState.RUNNING);
@@ -306,6 +314,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             
             var randSpeed = Math.floor(Math.random() *(levelDropObjectMaxSpeed - levelDropObjectMinSpeed + 1)) + levelDropObjectMinSpeed;
             dropObject.speed = randSpeed;
+            //dropObject.speed = 100;
             
             fallingItem = new PIXI.Sprite(texType);
 			fallingItem.anchor.x = 0.5;
@@ -339,7 +348,6 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             {   
                 if(inGameStateMachine.GetState() == ERunningState.RUNNING)
                 {
-                    console.log("HAARARAERARE");
                     PrintText("score",scoreCounter,490,20,0.5,0.5,true);
                 
                     //create a pointsystem and livesystem function for this
@@ -361,12 +369,19 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
                 }
                 else if(inGameStateMachine.GetState() == ERunningState.LEVELUP)
                 {
+                    squirrel.width += 0.3;
+                    squirrel.height += 0.3;
                     
+                    
+                    if(squirrel.height >= levelSquirrelSize["height"] && squirrel.width >= levelSquirrelSize["width"])
+                    {
+                        inGameStateMachine.SetState(ERunningState.RUNNING);
+                    }
                 }
                 
                 if(inGameStateMachine.GetPreviousState() == ERunningState.PAUSED)
                 {
-                    ClearText("paused");
+                    ClearText("pause");
                 }
             }
             
@@ -435,7 +450,6 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         {                   
             var enemyPositionX = squirrel.position.x;
             
-            
             //Get New Destination
             if(enemyPositionX >= dstPositonX && enemyPreviousPositionX <= dstPositonX || enemyPositionX <= dstPositonX && enemyPreviousPositionX >= dstPositonX)
             {
@@ -498,133 +512,163 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         /***************** BEGIN LEVEL SECTION *****************/
         function LevelSystem(scoreCounter)
         {
+            previousTickLevel = levelStateMachine.GetState();
             //var levelStateMachine = new StateMachine();
             
             if(scoreCounter <= 15)
             {
+                PrintTextSequence("lvl1","LEVEL 1",250,300,0.5,0.5,false,1000);
                 levelStateMachine.SetState(ELevelState.LEVEL_1);
             }
             else if(scoreCounter > 15 && scoreCounter <= 35)
             {
+                PrintTextSequence("lvl2","LEVEL 2",250,300,0.5,0.5,false,1000);
                 levelStateMachine.SetState(ELevelState.LEVEL_2);
             }
             else if(scoreCounter > 35 && scoreCounter <= 70)
             {
+                PrintTextSequence("lvl3","LEVEL 3",250,300,0.5,0.5,false,1000);
                 levelStateMachine.SetState(ELevelState.LEVEL_3);
             }
             else if(scoreCounter > 70 && scoreCounter <= 140)
             {
+                PrintTextSequence("lvl4","LEVEL 4",250,300,0.5,0.5,false,1000);
                 levelStateMachine.SetState(ELevelState.LEVEL_4);
             }
             else if(scoreCounter > 140 && scoreCounter <= 220)
             {
+                PrintTextSequence("lvl5","LEVEL 5",250,300,0.5,0.5,false,1000);
                 levelStateMachine.SetState(ELevelState.LEVEL_5);
             }
             else if(scoreCounter > 220 && scoreCounter <= 350)
             {
+                PrintTextSequence("lvl6","LEVEL 6",250,300,0.5,0.5,false,1000);
                 levelStateMachine.SetState(ELevelState.LEVEL_6);
             }
             else if(scoreCounter > 350 && scoreCounter <= 500)
             {
+                PrintTextSequence("lvl7","LEVEL 7",250,300,0.5,0.5,false,2000);
                 levelStateMachine.SetState(ELevelState.LEVEL_7);
             }
             else if(scoreCounter > 500)
             {
+                PrintTextSequence("lvl8","LEVEL 8",250,300,0.5,0.5,false,1000);
                 levelStateMachine.SetState(ELevelState.LEVEL_8);
             }
             if(debug_mode)
             {
                 if(scoreCounter >= 3000)
                 {
+                    PrintTextSequence("lvlP","PERFORMANCE TEST",250,300,0.5,0.5,false,1000);
                     levelStateMachine.SetState(ELevelState.LEVEL_PEFORMANCE_TEST);
                 }
             }
-            
-            LevelSettings(levelStateMachine.GetState);
+
+            //Only check LevelSettings if player has a levelup
+            if(levelStateMachine.GetState() != previousTickLevel)
+            {
+                //first level doesn't count
+                if(levelStateMachine.GetState() != ELevelState.LEVEL_1)
+                {
+                    inGameStateMachine.SetState(ERunningState.LEVELUP);
+                    console.log("GOT HERE");
+                }
+                
+                LevelSettings(levelStateMachine.GetState());
+            }
         }
         
         function LevelSettings(state)
         {
             if(state == ELevelState.LEVEL_1)
             {
-                PrintTextSequence("lvl1","LEVEL 1",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 5000;
                 levelBonus = 0;
                 levelSquirrelSpeed = 2;
                 levelDropObjectMinSpeed = 1;
                 levelDropObjectMaxSpeed = 2;
+                levelSquirrelSize["width"] = 80;
+                levelSquirrelSize["height"] = 80;
             }
             else if(state == ELevelState.LEVEL_2)
             {
-                PrintTextSequence("lvl2","LEVEL 2",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 4000;
                 levelBonus = 2;
                 levelSquirrelSpeed = 2;
                 levelDropObjectMinSpeed = 1;
                 levelDropObjectMaxSpeed = 2;
+                levelSquirrelSize["width"] = 100;
+                levelSquirrelSize["height"] = 100;
             }
             else if(state == ELevelState.LEVEL_3)
             {
-                PrintTextSequence("lvl3","LEVEL 3",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 4000;
                 levelBonus = 4;
                 levelSquirrelSpeed = 4;
                 levelDropObjectMinSpeed = 1;
                 levelDropObjectMaxSpeed = 3;
+                levelSquirrelSize["width"] = 130;
+                levelSquirrelSize["height"] = 130;
             }
             else if(state == ELevelState.LEVEL_4)
             {
-                PrintTextSequence("lvl4","LEVEL 4",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 4000;
                 levelBonus = 5;
                 levelSquirrelSpeed = 5;
                 levelDropObjectMinSpeed = 2;
                 levelDropObjectMaxSpeed = 3;
+                levelSquirrelSize["width"] = 160;
+                levelSquirrelSize["height"] = 160;
             }
             else if(state == ELevelState.LEVEL_5)
             {
-                PrintTextSequence("lvl5","LEVEL 5",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 3000;
                 levelBonus = 7;
                 levelSquirrelSpeed = 7;
-                levelDropObjectMinSpeed = 2;
-                levelDropObjectMaxSpeed = 3;
+                levelDropObjectMinSpeed = 200;
+                levelDropObjectMaxSpeed = 200;
+                levelSquirrelSize["width"] = 180;
+                levelSquirrelSize["height"] = 180;
             }
             else if(state == ELevelState.LEVEL_6)
             {
-                PrintTextSequence("lvl6","LEVEL 6",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 4000;
                 levelBonus = 10;
                 levelSquirrelSpeed = 7;
                 levelDropObjectMinSpeed = 1;
                 levelDropObjectMaxSpeed = 4;
+                levelSquirrelSize["width"] = 230;
+                levelSquirrelSize["height"] = 230;
             }
             else if(state == ELevelState.LEVEL_7)
             {
-                PrintTextSequence("lvl7","LEVEL 7",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 4000;
                 levelBonus = 10;
                 levelSquirrelSpeed = 7;
                 levelDropObjectMinSpeed = 2;
                 levelDropObjectMaxSpeed = 4;
+                levelSquirrelSize["width"] = 250;
+                levelSquirrelSize["height"] = 250;
             }
             else if(state == ELevelState.LEVEL_8)
             {
-                PrintTextSequence("lvl8","LEVEL 8",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 3000;
                 levelBonus = 12;
                 levelSquirrelSpeed = 7;
                 levelDropObjectMinSpeed = 2;
                 levelDropObjectMaxSpeed = 4;
+                levelSquirrelSize["width"] = 280;
+                levelSquirrelSize["height"] = 280;
             }
             else if(state == ELevelState.LEVEL_PEFORMANCE_TEST)
             {
-                PrintTextSequence("lvlP","PERFORMANCE TEST",250,300,0.5,0.5,false,2000);
                 levelDropInterval = 50;
                 levelBonus = 100;
                 levelSquirrelSpeed = 100;
                 levelDropObjectMinSpeed = 1;
                 levelDropObjectMaxSpeed = 10;
+                levelSquirrelSize["width"] = 350;
+                levelSquirrelSize["height"] = 350;
             }
             
         }
@@ -728,7 +772,7 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
         
         function PrintTextSequence(id,text,posX,posY,anchorX,anchorY,updateAble,milliSeconds)
         {
-            
+            console.log("GOGOGO");
             //if id is not available
             if(!(id in frameworkTextSequence))
             {
@@ -781,8 +825,10 @@ define(['pixi','fpsmeter'], function (PIXI,fpsmeter) {
             {
                 if((frameworkTextSequence[id].startTime + milliSeconds) <= Date.now())
                 {
+                    console.log("!!!!!!!!!!!!!!!!!!! DELETE ");
                     stage.removeChild(frameworkTextSequence[id].textObject);
                     frameworkTextSequence[id] = null;
+                    console.log(id + " removed ");
                 }
             }
             
