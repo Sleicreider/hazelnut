@@ -1,6 +1,4 @@
 http://sleicreider.github.io/hazelnut/
 
-Unfinished Test Project
-Game for web.
-(Early 2014)
-The code for this project was written in 1-2 days without any knowledge of javascript and pixi.js
+Test Project: Test Game with pixi.js
+Tested Javascript for the first time.
